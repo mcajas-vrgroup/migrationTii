@@ -26,61 +26,81 @@ func main() {
 		log.Fatalf("Error creando tabla temporal: %v", err)
 	}
 
-	// 4. Cargar y limpiar datos del CSV de asegurados
-	aseguradosData, err := data_loader.CleanAndProcessData("data.csv")
+	// Crear tabla temporal para limpiar registros únicos
+	if err := database.CreateCleanedTempTable(db); err != nil {
+		log.Fatalf("Error creando tabla limpia temporal: %v", err)
+	}
+
+	// 4. Cargar y limpiar datos de asegurados
+	log.Println("Cargando y procesando datos de asegurados...")
+	aseguradosData, err := data_loader.CleanAndProcessData("data/asegurados.csv")
 	if err != nil {
 		log.Fatalf("Error procesando CSV de asegurados: %v", err)
 	}
 
-	// 5. Insertar datos en la tabla temporal
-	if err := database.LoadDataToTempTable(db, aseguradosData); err != nil {
-		log.Fatalf("Error cargando datos en la tabla temporal: %v", err)
+	// 5. Insertar en tabla temporal asegurados
+	if err := database.LoadAseguradosData(db, aseguradosData); err != nil {
+		log.Fatalf("Error insertando datos en temp_csv_data: %v", err)
 	}
 
-	// 6. Insertar en PARTY
-	if err := database.InsertPartyData(db); err != nil {
-		log.Fatalf("Error insertando PARTY: %v", err)
-	}
-
-	// 7. Insertar en IDENTIFICATION y asociar a PARTY_IDENTIFICATION
-	if err := database.InsertIdentificationData(db); err != nil {
-		log.Fatalf("Error insertando IDENTIFICATION: %v", err)
-	}
-
-	// 8. Insertar en EMAIL y asociar a PARTY_EMAIL
-	if err := database.InsertEmailData(db, extractEmails(aseguradosData)); err != nil {
-		log.Fatalf("Error insertando EMAIL: %v", err)
-	}
-
-	// 9. Insertar en PHONE y asociar a PARTY_PHONE
-	if err := database.InsertPhoneData(db, extractPhoneData(aseguradosData)); err != nil {
-		log.Fatalf("Error insertando PHONE: %v", err)
-	}
-
-	// 10. Obtener mapeo de regiones y provincias
-	regionMapping, err := database.GetRegionProvinceMapping(db)
-	if err != nil {
-		log.Fatalf("Error obteniendo mapeo de regiones: %v", err)
-	}
-
-	// 11. Insertar en ADDRESS y asociar a PARTY_ADDRESS
-	if err := database.InsertAddressData(db, extractAddressData(aseguradosData), regionMapping); err != nil {
-		log.Fatalf("Error insertando ADDRESS: %v", err)
-	}
-
-	// 12. Insertar en PERSON
-	if err := database.InsertPersonData(db); err != nil {
-		log.Fatalf("Error insertando PERSON: %v", err)
-	}
-
-	// 13. Cargar y limpiar datos del CSV de pólizas
-	polizasData, err := data_loader.CleanDataPolizas("polizas.csv")
+	// 6. Cargar y limpiar datos de pólizas
+	log.Println("Cargando y procesando datos de pólizas...")
+	polizasData, err := data_loader.CleanDataPolizas("data/polizas.csv")
 	if err != nil {
 		log.Fatalf("Error procesando CSV de pólizas: %v", err)
 	}
 
+	// 7. Insertar en tabla temporal pólizas
+	if err := database.LoadPolizasData(db, polizasData); err != nil {
+		log.Fatalf("Error insertando datos en temp_polizas_data: %v", err)
+	}
+
+	// 8. Insertar en PARTY
+	if err := database.InsertPartyData(db); err != nil {
+		log.Fatalf("Error insertando PARTY: %v", err)
+	}
+
+	// 9. Insertar en IDENTIFICATION y asociar a PARTY_IDENTIFICATION
+	if err := database.InsertIdentificationData(db); err != nil {
+		log.Fatalf("Error insertando IDENTIFICATION: %v", err)
+	}
+
+	// Asociar PARTY con IDENTIFICATION
+	if err := database.AssociatePartyIdentification(db); err != nil {
+		log.Fatalf("Error asociando PARTY_IDENTIFICATION: %v", err)
+	}
+
+	// 10. Insertar en EMAIL y asociar a PARTY_EMAIL
+	if err := database.InsertEmail(db); err != nil {
+		log.Fatalf("Error insertando EMAIL: %v", err)
+	}
+	if err := database.AssociatePartyEmail(db); err != nil {
+		log.Fatalf("Error asociando PARTY_EMAIL: %v", err)
+	}
+
+	// 11. Insertar en PHONE y asociar a PARTY_PHONE
+	if err := database.InsertPhone(db); err != nil {
+		log.Fatalf("Error insertando PHONE: %v", err)
+	}
+	if err := database.AssociatePartyPhone(db); err != nil {
+		log.Fatalf("Error asociando PARTY_PHONE: %v", err)
+	}
+
+	// 12. Insertar en ADDRESS y asociar a PARTY_ADDRESS
+	if err := database.InsertAddress(db); err != nil {
+		log.Fatalf("Error insertando ADDRESS: %v", err)
+	}
+	if err := database.AssociatePartyAddress(db); err != nil {
+		log.Fatalf("Error asociando PARTY_ADDRESS: %v", err)
+	}
+
+	// 13. Insertar en PERSON
+	if err := database.InsertPersonData(db); err != nil {
+		log.Fatalf("Error insertando PERSON: %v", err)
+	}
+
 	// 14. Insertar en PAYMENT_TERM
-	if err := database.InsertPaymentTerm(db, polizasData); err != nil {
+	if err := database.InsertPaymentTerm(db); err != nil {
 		log.Fatalf("Error insertando PAYMENT_TERM: %v", err)
 	}
 
@@ -90,50 +110,6 @@ func main() {
 	}
 
 	log.Println("Proceso completado correctamente.")
-}
-
-func extractEmails(records [][]string) []string {
-	emailSet := make(map[string]struct{})
-	for _, row := range records[1:] { // Saltamos encabezado
-		email := row[10] // EMAIL está en la columna 10
-		if email != "" {
-			emailSet[email] = struct{}{}
-		}
-	}
-	var emails []string
-	for email := range emailSet {
-		emails = append(emails, email)
-	}
-	return emails
-}
-
-func extractPhoneData(records [][]string) map[string]string {
-	phoneData := make(map[string]string)
-	for _, row := range records[1:] {
-		email := row[10] // EMAIL
-		phone := row[9]  // TELEFONO
-		if email != "" && phone != "" {
-			phoneData[email] = phone
-		}
-	}
-	return phoneData
-}
-
-func extractAddressData(records [][]string) []map[string]string {
-	var addressData []map[string]string
-	for _, row := range records[1:] {
-		address := map[string]string{
-			"EMAIL":             row[10],
-			"ADDRESS_STREET":    row[18],
-			"ADDRESS_NUMBER":    row[19],
-			"ADDRESS_APARTMENT": row[20],
-			"REGION":            row[13],
-			"COMUNA":            row[15],
-			"CODCIUDAD":         row[16],
-		}
-		addressData = append(addressData, address)
-	}
-	return addressData
 }
 
 func extractContractData(records []map[string]string) []map[string]string {

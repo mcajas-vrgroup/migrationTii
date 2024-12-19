@@ -6,49 +6,48 @@ import (
 )
 
 // Insert PaymentTerm inserta datos en PAYMENT_TERM asociados a PARTY_ID.
-func InsertPaymentTerm(db *sql.DB, paymentData []map[string]string) error {
+func InsertPaymentTerm(db *sql.DB) error {
 	query := `
 	INSERT INTO PAYMENT_TERM (
-		PARTY_ID, PAYMENT_TYPE_ID, CURRENCY_ID, BANK_ID, EXPIRATION,
-		ACCOUNT_NBR, INTER_ACCOUNT_NBR, PAYMENT_KEY, REQUIRES_RECEIPT
+		PARTY_ID, PAYMENT_TYPE_ID, CURRENCY_ID, BANK_ID, EXPIRATION, ACCOUNT_NBR, INTER_ACCOUNT_NBR, PAYMENT_KEY, REQUIRES_RECEIPT
 	)
-	SELECT p.PARTY_ID, ?, 3000, ?, ?, NULL, NULL, NULL, NULL
-	FROM POLICY po
+	SELECT
+		p.PARTY_ID,
+		CASE
+			WHEN t.DESCTPCONDCOBRO = 'CARGO A CUENTA' THEN 2000
+			WHEN t.DESCTPCONDCOBRO = 'CARGO A TARJETA' THEN 3000
+			WHEN t.DESCTPCONDCOBRO = 'COBRO DIRECTO' THEN 1000
+			ELSE NULL
+		END AS PAYMENT_TYPE_ID,
+		3000 AS CURRENCY_ID,
+		CASE
+			WHEN t.DESCCONDCOBRO LIKE '%ITAU%' THEN 9
+			WHEN t.DESCCONDCOBRO LIKE '%CREDITO%' THEN 5
+			WHEN t.DESCCONDCOBRO LIKE '%SANTANDER%' THEN 8
+			WHEN t.DESCCONDCOBRO LIKE '%TRANSBANK%' THEN 4
+			WHEN t.DESCCONDCOBRO LIKE '%CHILE%' THEN 1
+			ELSE NULL
+		END AS BANK_ID,
+		CASE
+			WHEN t.DESCTPCONDCOBRO = 'CARGO A TARJETA' THEN '2028-10-01 00:00:00'
+			ELSE NULL
+		END AS EXPIRATION,
+		NULL AS ACCOUNT_NBR,
+		NULL AS INTER_ACCOUNT_NBR,
+		NULL AS PAYMENT_KEY,
+		NULL AS REQUIRES_RECEIPT
+	FROM temp_polizas_data t
+	JOIN POLICY po ON po.POLICY_NUMBER = t.NPOLIZA
 	JOIN PARTY p ON p.PARTY_ID = po.PARTY_ID
-	WHERE po.POLICY_NUMBER = ?
-	ON DUPLICATE KEY UPDATE 
-		PAYMENT_TYPE_ID=VALUES(PAYMENT_TYPE_ID), 
-		BANK_ID=VALUES(BANK_ID);`
+	ON DUPLICATE KEY UPDATE
+		PAYMENT_TYPE_ID = VALUES(PAYMENT_TYPE_ID),
+		BANK_ID = VALUES(BANK_ID),
+		EXPIRATION = VALUES(EXPIRATION);
+	`
 
-	tx, err := db.Begin()
-	if err != nil {
-		return fmt.Errorf("error al iniciar la transacción: %v", err)
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("error insertando PAYMENT_TERM: %v", err)
 	}
-	defer tx.Rollback()
-
-	stmt, err := tx.Prepare(query)
-	if err != nil {
-		return fmt.Errorf("error al preparar la consulta: %v", err)
-	}
-	defer stmt.Close()
-
-	// Iterar sobre los datos y ejecutar la inserción
-	for _, row := range paymentData {
-		_, err := stmt.Exec(
-			row["PAYMENT_TYPE_ID"],
-			row["BANK_ID"],
-			row["EXPIRATION"],
-			row["NPOLIZA"],
-		)
-		if err != nil {
-			return fmt.Errorf("error insertando PAYMENT_TERM: %v", err)
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("error al confirmar la transacción: %v", err)
-	}
-
 	fmt.Println("Datos insertados en PAYMENT_TERM correctamente.")
 	return nil
 }

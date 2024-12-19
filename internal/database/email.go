@@ -5,42 +5,33 @@ import (
 	"fmt"
 )
 
-// Insertar EMAIL y asociar PARTY_EMAIL
-func InsertEmailData(db *sql.DB, emails []string) error {
-	emailQuery := `
+// Insert Email inserta correos electrónicos únicos en la tabla EMAIL.
+func InsertEmail(db *sql.DB) error {
+	query := `
 	INSERT INTO EMAIL (EMAIL, EMAIL_TYPE_ID, EMAIL_DEFAULT)
-	VALUES (?, 1, NULL)
-	ON DUPLICATE KEY UPDATE EMAIL=VALUES(EMAIL);`
+	SELECT DISTINCT EMAIL, 1, NULL
+	FROM temp_csv_data
+	WHERE EMAIL IS NOT NULL
+	ON DUPLICATE KEY UPDATE EMAIL=VALUES(EMAIL);
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("error insertando EMAIL: %v", err)
+	}
+	fmt.Println("Datos insertados en EMAIL correctamente.")
+	return nil
+}
 
-	partyEmailQuery := `
-	INSERT IGNORE INTO PARTY_EMAIL (EMAIL_ID, PARTY_ID)
+// Associate Party Email asocia EMAIL con PARTY en PARTY_EMAIL.
+func AssociatePartyEmail(db *sql.DB) error {
+	query := `
+	INSERT INTO PARTY_EMAIL (EMAIL_ID, PARTY_ID)
 	SELECT e.EMAIL_ID, p.PARTY_ID
 	FROM EMAIL e
-	JOIN PARTY p ON p.EMAIL = e.EMAIL
-	WHERE e.EMAIL = ?;`
-
-	tx, err := db.Begin()
-	if err != nil {
-		return err
+	JOIN PARTY p ON p.EMAIL = e.EMAIL;
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("error asociando PARTY_EMAIL: %v", err)
 	}
-
-	stmtEmail, _ := tx.Prepare(emailQuery)
-	stmtPartyEmail, _ := tx.Prepare(partyEmailQuery)
-
-	for _, email := range emails {
-		if _, err := stmtEmail.Exec(email); err != nil {
-			tx.Rollback()
-			return fmt.Errorf("error insertando EMAIL: %v", err)
-		}
-		if _, err := stmtPartyEmail.Exec(email); err != nil {
-			tx.Rollback()
-			return fmt.Errorf("error asociando PARTY_EMAIL: %v", err)
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("error al commitear transacción: %v", err)
-	}
-	fmt.Println("EMAIL y PARTY_EMAIL insertados correctamente.")
+	fmt.Println("PARTY_EMAIL asociada correctamente.")
 	return nil
 }

@@ -5,43 +5,33 @@ import (
 	"fmt"
 )
 
-// Inserta en PHONE y asocia a PARTY_PHONE
-func InsertPhoneData(db *sql.DB, phoneData map[string]string) error {
-	phoneQuery := `
+// Insert Phone inserta números de teléfono únicos en la tabla PHONE.
+func InsertPhone(db *sql.DB) error {
+	query := `
 	INSERT INTO PHONE (PHONE_TYPE_ID, COUNTRY_CODE, AREA_CODE, PHONE_NUMBER, PHONE_DEFAULT)
-	VALUES (1, 56, 9, ?, NULL)
-	ON DUPLICATE KEY UPDATE PHONE_NUMBER=VALUES(PHONE_NUMBER);`
+	SELECT DISTINCT 1, 56, 9, SUBSTRING_INDEX(TELEFONO, '-', -1), NULL
+	FROM temp_csv_data
+	WHERE TELEFONO IS NOT NULL;
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("error insertando PHONE: %v", err)
+	}
+	fmt.Println("Datos insertados en PHONE correctamente.")
+	return nil
+}
 
-	partyPhoneQuery := `
-	INSERT IGNORE INTO PARTY_PHONE (PHONE_ID, PARTY_ID)
+// Associate Party Phone asocia PHONE con PARTY en PARTY_PHONE.
+func AssociatePartyPhone(db *sql.DB) error {
+	query := `
+	INSERT INTO PARTY_PHONE (PHONE_ID, PARTY_ID)
 	SELECT ph.PHONE_ID, p.PARTY_ID
 	FROM PHONE ph
-	JOIN PARTY p ON p.EMAIL = ?
-	WHERE ph.PHONE_NUMBER = ?;`
-
-	tx, err := db.Begin()
-	if err != nil {
-		return err
+	JOIN PARTY p ON p.EMAIL = temp_csv_data.EMAIL
+	WHERE ph.PHONE_NUMBER = SUBSTRING_INDEX(temp_csv_data.TELEFONO, '-', -1);
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("error asociando PARTY_PHONE: %v", err)
 	}
-	defer tx.Rollback()
-
-	phoneStmt, _ := tx.Prepare(phoneQuery)
-	partyPhoneStmt, _ := tx.Prepare(partyPhoneQuery)
-
-	for email, phone := range phoneData {
-		_, err := phoneStmt.Exec(phone)
-		if err != nil {
-			return fmt.Errorf("error insertando PHONE: %v", err)
-		}
-		_, err = partyPhoneStmt.Exec(email, phone)
-		if err != nil {
-			return fmt.Errorf("error asociando PARTY_PHONE: %v", err)
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("error al confirmar transacción: %v", err)
-	}
-	fmt.Println("PHONE y PARTY_PHONE insertados correctamente.")
+	fmt.Println("PARTY_PHONE asociada correctamente.")
 	return nil
 }

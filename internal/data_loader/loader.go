@@ -45,37 +45,47 @@ func SplitAddress(address string) (string, string, string) {
 }
 
 // Carga y procesa datos desde CSV
-func CleanAndProcessData(csvPath string) ([][]string, error) {
+func CleanAndProcessData(csvPath string) ([]map[string]string, error) {
 	file, err := os.Open(csvPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error al abrir el archivo CSV: %v", err)
 	}
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	reader.Comma = ';'
+	reader.Comma = ';' // Delimitador de columna
+
 	records, err := reader.ReadAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error al leer el CSV: %v", err)
 	}
 
-	// Procesar cada fila
-	for i, row := range records {
-		if i == 0 {
-			// Agregar nuevas columnas
-			row = append(row, "ADDRESS_STREET", "ADDRESS_NUMBER", "ADDRESS_APARTMENT")
-			records[i] = row
-			continue
+	if len(records) == 0 {
+		return nil, fmt.Errorf("el archivo CSV está vacío")
+	}
+
+	headers := append(records[0], "ADDRESS_STREET", "ADDRESS_NUMBER", "ADDRESS_APARTMENT")
+	data := make([]map[string]string, 0)
+
+	for _, row := range records[1:] {
+		entry := make(map[string]string)
+		for i, value := range row {
+			entry[headers[i]] = strings.TrimSpace(value)
 		}
 
-		row[5] = CleanRUT(row[5])                          // Limpieza de RUT
-		row[9] = CleanPhone(row[9])                        // Limpieza de teléfono
-		street, number, apartment := SplitAddress(row[11]) // División de dirección
-		row = append(row, street, number, apartment)
-		records[i] = row
-	}
+		// Procesar RUT y teléfono
+		entry["RUT"] = CleanRUT(entry["RUT"])
+		entry["TELEFONO"] = CleanPhone(entry["TELEFONO"])
 
-	return records, nil
+		// Dividir dirección
+		street, number, apartment := SplitAddress(entry["DIRECCION"])
+		entry["ADDRESS_STREET"] = street
+		entry["ADDRESS_NUMBER"] = number
+		entry["ADDRESS_APARTMENT"] = apartment
+
+		data = append(data, entry)
+	}
+	return data, nil
 }
 
 // cleanDataPolizas procesa el CSV de pólizas y devuelve un slice de mapas.

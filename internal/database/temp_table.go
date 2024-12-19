@@ -3,59 +3,122 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 )
 
-// Crea la tabla temporal
-func CreateTempTable(db *sql.DB) error {
-	query := `
-	CREATE TEMPORARY TABLE IF NOT EXISTS temp_csv_data (
-		RAMO INT, NPOLIZA VARCHAR(50), NOMBRES VARCHAR(255), 
-		APEMATERNO VARCHAR(100), APEPATERNO VARCHAR(100), RUT VARCHAR(50), 
-		FECNAC DATE, CLAVESEXO INT, ESTCIVIL VARCHAR(50), 
-		TELEFONO VARCHAR(50), EMAIL VARCHAR(200), DIRECCION VARCHAR(255), 
-		CODREGION INT, REGION VARCHAR(100), CODCOMUNA INT, 
-		COMUNA VARCHAR(100), CODCIUDAD INT, CIUDAD VARCHAR(100)
-	) ENGINE=InnoDB;`
+// file Exists verifica si un archivo existe en la ruta proporcionada.
+func fileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
+}
 
-	_, err := db.Exec(query)
-	if err != nil {
-		return fmt.Errorf("error al crear la tabla temporal: %v", err)
+// Create TempTables crea tablas temporales para asegurados y pólizas.
+func CreateTempTable(db *sql.DB) error {
+	queries := []string{
+		`CREATE TEMPORARY TABLE temp_csv_data (
+			RAMO INT, NPOLIZA VARCHAR(50), NOMBRES VARCHAR(255),
+			APEMATERNO VARCHAR(100), APEPATERNO VARCHAR(100), RUT VARCHAR(50),
+			FECNAC DATE, CLAVESEXO INT, DESCSEXO VARCHAR(50), CODCIVIL INT,
+			ESTCIVIL VARCHAR(50), TELEFONO VARCHAR(50), EMAIL VARCHAR(200),
+			DIRECCION VARCHAR(255), CODREGION INT, REGION VARCHAR(100),
+			CODCOMUNA INT, COMUNA VARCHAR(100), CODCIUDAD INT, CIUDAD VARCHAR(100)
+		) CHARSET=utf8mb4;`,
+
+		`CREATE TEMPORARY TABLE temp_polizas_data (
+			RAMO INT, NPOLIZA VARCHAR(50), REQUEST VARCHAR(50), CODESTADO VARCHAR(10),
+			ESTADO VARCHAR(50), NPOLORI VARCHAR(50), FINIVIG DATE, FTERVIG DATE,
+			IDCONDCOBRO VARCHAR(50), DESCCONDCOBRO VARCHAR(100), TPCONDCOBRO VARCHAR(10),
+			DESCTPCONDCOBRO VARCHAR(50), IDPERIODPAGO VARCHAR(10), DESCPERPAGO VARCHAR(50)
+		);`,
 	}
-	fmt.Println("Tabla temporal creada exitosamente.")
+
+	fmt.Println("Creando tablas temporales...")
+
+	for _, query := range queries {
+		if _, err := db.Exec(query); err != nil {
+			return fmt.Errorf("error creando tabla temporal: %v", err)
+		}
+	}
+	fmt.Println("Tablas temporales creadas exitosamente.")
 	return nil
 }
 
-// Carga los datos del CSV en la tabla temporal
-func LoadDataToTempTable(db *sql.DB, records [][]string) error {
-	// Query para insertar datos en la tabla temporal
+// Create Cleaned Temp Table crea una tabla temporal con datos únicos.
+func CreateCleanedTempTable(db *sql.DB) error {
 	query := `
-	INSERT INTO temp_csv_data (
+	CREATE TEMPORARY TABLE temp_cleaned_data AS
+	SELECT RAMO, NPOLIZA, NOMBRES, APEMATERNO, APEPATERNO, RUT, FECNAC, CLAVESEXO,
+	       DESCSEXO, CODCIVIL, ESTCIVIL,
+	       MAX(TELEFONO)  AS TELEFONO,
+	       MAX(EMAIL)     AS EMAIL,
+	       MAX(DIRECCION) AS DIRECCION,
+	       CODREGION, REGION, CODCOMUNA, COMUNA, CODCIUDAD, CIUDAD
+	FROM temp_csv_data
+	GROUP BY RUT;
+	`
+
+	fmt.Println("Creando tabla limpia temporal (temp_cleaned_data)...")
+
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("error creando temp_cleaned_data: %v", err)
+	}
+	fmt.Println("Tabla temp_cleaned_data creada correctamente.")
+	return nil
+}
+
+// Load AseguradosData carga los datos procesados a la tabla temp_csv_data.
+func LoadAseguradosData(db *sql.DB, records []map[string]string) error {
+	query := `INSERT INTO temp_csv_data (
 		RAMO, NPOLIZA, NOMBRES, APEMATERNO, APEPATERNO, RUT, FECNAC, CLAVESEXO, 
 		ESTCIVIL, TELEFONO, EMAIL, DIRECCION, CODREGION, REGION, CODCOMUNA, 
-		COMUNA, CODCIUDAD, CIUDAD
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+		COMUNA, CODCIUDAD, CIUDAD, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_APARTMENT
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-	// Preparar la consulta SQL
 	stmt, err := db.Prepare(query)
 	if err != nil {
-		return fmt.Errorf("error al preparar la consulta: %v", err)
+		return fmt.Errorf("error preparando la consulta: %v", err)
 	}
 	defer stmt.Close()
 
-	// Iterar sobre los registros y ejecutar la inserción
-	for i, row := range records {
-		if i == 0 {
-			continue // Saltar la fila de encabezados
-		}
+	for _, row := range records {
 		_, err := stmt.Exec(
-			row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
-			row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], row[17],
+			row["RAMO"], row["NPOLIZA"], row["NOMBRES"], row["APEMATERNO"], row["APEPATERNO"], row["RUT"],
+			row["FECNAC"], row["CLAVESEXO"], row["ESTCIVIL"], row["TELEFONO"], row["EMAIL"], row["DIRECCION"],
+			row["CODREGION"], row["REGION"], row["CODCOMUNA"], row["COMUNA"], row["CODCIUDAD"], row["CIUDAD"],
+			row["ADDRESS_STREET"], row["ADDRESS_NUMBER"], row["ADDRESS_APARTMENT"],
 		)
 		if err != nil {
-			return fmt.Errorf("error al insertar fila %d en la tabla temporal: %v", i, err)
+			return fmt.Errorf("error insertando fila: %v", err)
 		}
 	}
+	fmt.Println("Datos de asegurados insertados correctamente en temp_csv_data.")
+	return nil
+}
 
-	fmt.Printf("Se insertaron %d registros en la tabla temporal.\n", len(records)-1)
+// Load PolizasData carga los datos procesados a la tabla temp_polizas_data.
+func LoadPolizasData(db *sql.DB, data []map[string]string) error {
+	query := `INSERT INTO temp_polizas_data (
+		RAMO, NPOLIZA, REQUEST, CODESTADO, ESTADO, NPOLORI, FINIVIG, FTERVIG,
+		IDCONDCOBRO, DESCCONDCOBRO, TPCONDCOBRO, DESCTPCONDCOBRO, IDPERIODPAGO, DESCPERPAGO
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("error preparando la consulta: %v", err)
+	}
+	defer stmt.Close()
+
+	for _, row := range data {
+		_, err := stmt.Exec(
+			row["RAMO"], row["NPOLIZA"], row["REQUEST"], row["CODESTADO"],
+			row["ESTADO"], row["NPOLORI"], row["FINIVIG"], row["FTERVIG"],
+			row["IDCONDCOBRO"], row["DESCCONDCOBRO"], row["TPCONDCOBRO"],
+			row["DESCTPCONDCOBRO"], row["IDPERIODPAGO"], row["DESCPERPAGO"],
+		)
+		if err != nil {
+			return fmt.Errorf("error insertando pólizas: %v", err)
+		}
+	}
+	fmt.Println("Datos de pólizas insertados correctamente.")
 	return nil
 }
