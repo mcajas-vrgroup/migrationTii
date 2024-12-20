@@ -112,5 +112,10 @@ func main() {
 		log.Fatalf("Error insertando CONTRACT_HEADER: %v", err)
 	}
 
+	// 18. Insertar en REQUEST
+	if err := database.InsertRequest(db); err != nil {
+		log.Fatalf("Error insertando en REQUEST: %v", err)
+	}
+
 	log.Println("Proceso completado correctamente.")
 }
