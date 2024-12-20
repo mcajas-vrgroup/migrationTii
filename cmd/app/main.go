@@ -104,22 +104,13 @@ func main() {
 	}
 
 	// 17. Insertar en CONTRACT_HEADER
-	if err := database.InsertContractHeader(db, extractContractData(polizasData)); err != nil {
+	if err := database.CreateTempIssuanceDates(db); err != nil {
+		log.Fatalf("Error creando temp_issuance_dates: %v", err)
+	}
+
+	if err := database.InsertContractHeader(db); err != nil {
 		log.Fatalf("Error insertando CONTRACT_HEADER: %v", err)
 	}
 
 	log.Println("Proceso completado correctamente.")
-}
-
-func extractContractData(records []map[string]string) []map[string]string {
-	var contractData []map[string]string
-	for _, row := range records {
-		contract := map[string]string{
-			"EMAIL":         row["EMAIL"],
-			"CONTRACT_FROM": row["CONTRACT_FROM"],
-			"CONTRACT_TO":   row["CONTRACT_TO"],
-		}
-		contractData = append(contractData, contract)
-	}
-	return contractData
 }
