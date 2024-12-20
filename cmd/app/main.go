@@ -60,17 +60,22 @@ func main() {
 		log.Fatalf("Error insertando PARTY: %v", err)
 	}
 
-	// 9. Insertar en IDENTIFICATION y asociar a PARTY_IDENTIFICATION
-	if err := database.InsertIdentificationData(db); err != nil {
-		log.Fatalf("Error insertando IDENTIFICATION: %v", err)
+	// 9. Crear tabla temporal de RUT limpios
+	if err := database.CreateTempCleanedRUT(db); err != nil {
+		log.Fatalf("Error creando tabla temp_cleaned_rut: %v", err)
 	}
 
-	// Asociar PARTY con IDENTIFICATION
+	// 10. Insertar en IDENTIFICATION
+	if err := database.InsertIdentification(db); err != nil {
+		log.Fatalf("Error insertando en IDENTIFICATION: %v", err)
+	}
+
+	// 11. Asociar PARTY con IDENTIFICATION
 	if err := database.AssociatePartyIdentification(db); err != nil {
 		log.Fatalf("Error asociando PARTY_IDENTIFICATION: %v", err)
 	}
 
-	// 10. Insertar en EMAIL y asociar a PARTY_EMAIL
+	// 12. Insertar en EMAIL y asociar a PARTY_EMAIL
 	if err := database.InsertEmail(db); err != nil {
 		log.Fatalf("Error insertando EMAIL: %v", err)
 	}
@@ -78,7 +83,7 @@ func main() {
 		log.Fatalf("Error asociando PARTY_EMAIL: %v", err)
 	}
 
-	// 11. Insertar en PHONE y asociar a PARTY_PHONE
+	// 13. Insertar en PHONE y asociar a PARTY_PHONE
 	if err := database.InsertPhone(db); err != nil {
 		log.Fatalf("Error insertando PHONE: %v", err)
 	}
@@ -86,7 +91,7 @@ func main() {
 		log.Fatalf("Error asociando PARTY_PHONE: %v", err)
 	}
 
-	// 12. Insertar en ADDRESS y asociar a PARTY_ADDRESS
+	// 14. Insertar en ADDRESS y asociar a PARTY_ADDRESS
 	if err := database.InsertAddress(db); err != nil {
 		log.Fatalf("Error insertando ADDRESS: %v", err)
 	}
@@ -94,17 +99,17 @@ func main() {
 		log.Fatalf("Error asociando PARTY_ADDRESS: %v", err)
 	}
 
-	// 13. Insertar en PERSON
+	// 15. Insertar en PERSON
 	if err := database.InsertPersonData(db); err != nil {
 		log.Fatalf("Error insertando PERSON: %v", err)
 	}
 
-	// 14. Insertar en PAYMENT_TERM
+	// 16. Insertar en PAYMENT_TERM
 	if err := database.InsertPaymentTerm(db); err != nil {
 		log.Fatalf("Error insertando PAYMENT_TERM: %v", err)
 	}
 
-	// 15. Insertar en CONTRACT_HEADER
+	// 17. Insertar en CONTRACT_HEADER
 	if err := database.InsertContractHeader(db, extractContractData(polizasData)); err != nil {
 		log.Fatalf("Error insertando CONTRACT_HEADER: %v", err)
 	}
