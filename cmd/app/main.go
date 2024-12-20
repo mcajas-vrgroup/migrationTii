@@ -77,18 +77,12 @@ func main() {
 
 	// 12. Insertar en EMAIL y asociar a PARTY_EMAIL
 	if err := database.InsertEmail(db); err != nil {
-		log.Fatalf("Error insertando EMAIL: %v", err)
-	}
-	if err := database.AssociatePartyEmail(db); err != nil {
-		log.Fatalf("Error asociando PARTY_EMAIL: %v", err)
+		log.Fatalf("Error insertando EMAIL y asociando PARTY_EMAIL: %v", err)
 	}
 
 	// 13. Insertar en PHONE y asociar a PARTY_PHONE
 	if err := database.InsertPhone(db); err != nil {
-		log.Fatalf("Error insertando PHONE: %v", err)
-	}
-	if err := database.AssociatePartyPhone(db); err != nil {
-		log.Fatalf("Error asociando PARTY_PHONE: %v", err)
+		log.Fatalf("Error insertando PHONE y asociando PARTY_PHONE: %v", err)
 	}
 
 	// 14. Insertar en ADDRESS y asociar a PARTY_ADDRESS
