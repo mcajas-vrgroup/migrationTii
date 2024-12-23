@@ -33,7 +33,7 @@ func main() {
 
 	// 4. Procesar y cargar datos base
 	log.Println("Cargando y procesando datos de asegurados...")
-	aseguradosData, err := data_loader.CleanAndProcessData("data/asegurados.csv")
+	aseguradosData, err := data_loader.CleanAndProcessData("pkg/utils/data/MIGSA_ASEGURADOS_CSV.csv")
 	if err != nil {
 		log.Fatalf("Error procesando CSV de asegurados: %v", err)
 	}
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	log.Println("Cargando y procesando datos de pólizas...")
-	polizasData, err := data_loader.CleanDataPolizas("data/polizas.csv")
+	polizasData, err := data_loader.CleanDataPolizas("pkg/utils/data/MIGSA_POLIZAS-18-12_CSV.csv")
 	if err != nil {
 		log.Fatalf("Error procesando CSV de pólizas: %v", err)
 	}
@@ -121,6 +121,12 @@ func main() {
 	log.Println("Procesando datos de POLICY_ECONOMICS...")
 	if err := database.InsertPolicyEconomics(db); err != nil {
 		log.Fatalf("Error insertando datos en POLICY_ECONOMICS: %v", err)
+	}
+
+	// 9. Insertar en BILLING_STATEMENT
+	log.Println("Procesando datos de BILLING_STATEMENT...")
+	if err := database.InsertBillingStatement(db); err != nil {
+		log.Fatalf("Error insertando datos en BILLING_STATEMENT: %v", err)
 	}
 
 	log.Println("Proceso completado correctamente.")
