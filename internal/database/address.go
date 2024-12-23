@@ -6,7 +6,7 @@ import (
 )
 
 // Insert Address inserta datos únicos en la tabla ADDRESS.
-func InsertAddress(db *sql.DB) error {
+func InsertAddress(db *sql.Tx) error {
 	insertAddressQuery := `
 	INSERT INTO ADDRESS (
 		ADDRESS_TYPE_ID, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_APARTMENT, 
@@ -37,7 +37,7 @@ func InsertAddress(db *sql.DB) error {
 }
 
 // Associate Party Address asocia las direcciones con PARTY en la tabla PARTY_ADDRESS.
-func AssociatePartyAddress(db *sql.DB) error {
+func AssociatePartyAddress(db *sql.Tx) error {
 	associateQuery := `
 	INSERT INTO PARTY_ADDRESS (ADDRESS_ID, PARTY_ID)
 	SELECT a.ADDRESS_ID, p.PARTY_ID

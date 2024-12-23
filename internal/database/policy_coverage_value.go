@@ -6,7 +6,7 @@ import (
 )
 
 // Insert PolicyCoverageValue inserta datos en la tabla POLICY_COVERAGE_VALUE
-func InsertPolicyCoverageValue(db *sql.DB) error {
+func InsertPolicyCoverageValue(db *sql.Tx) error {
 	query := `
 	INSERT INTO POLICY_COVERAGE_VALUE (
     INSURER_PARTY_ID,

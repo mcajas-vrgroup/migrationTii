@@ -6,7 +6,7 @@ import (
 )
 
 // InsertEmailData inserta registros únicos en EMAIL.
-func InsertEmail(db *sql.DB) error {
+func InsertEmail(db *sql.Tx) error {
 	// Insertar en EMAIL
 	insertEmailQuery := `
 	INSERT INTO EMAIL (EMAIL, EMAIL_TYPE_ID, EMAIL_DEFAULT)

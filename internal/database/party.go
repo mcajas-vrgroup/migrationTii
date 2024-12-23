@@ -6,7 +6,7 @@ import (
 )
 
 // Inser tParty Data inserta registros únicos en la tabla PARTY si no existen.
-func InsertPartyData(db *sql.DB) error {
+func InsertPartyData(db *sql.Tx) error {
 	// Query para insertar PARTY si no existe
 	insertPartyQuery := `
 	INSERT INTO PARTY (EMAIL, DATE_CREATED, PARTY_SEARCH_AS, CIIU_ID, NATIONALITY, PARTY_ACTIVITY_ID, PRACTICE_ID, 

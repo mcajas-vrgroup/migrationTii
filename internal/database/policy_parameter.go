@@ -7,7 +7,7 @@ import (
 )
 
 // Insert PolicyParameter inserta los parámetros asociados a las pólizas en la tabla POLICY_PARAMETER.
-func InsertPolicyParameter(db *sql.DB) error {
+func InsertPolicyParameter(db *sql.Tx) error {
 	query := `
 		INSERT INTO POLICY_PARAMETER (
     INSURER_PARTY_ID,

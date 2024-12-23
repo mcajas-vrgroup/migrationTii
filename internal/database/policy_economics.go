@@ -6,7 +6,7 @@ import (
 )
 
 // Insert PolicyEconomics inserta datos en la tabla POLICY_ECONOMICS.
-func InsertPolicyEconomics(db *sql.DB) error {
+func InsertPolicyEconomics(db *sql.Tx) error {
 	query := `
     INSERT INTO POLICY_ECONOMICS (
     ECONOMIC_ITEM_ID,

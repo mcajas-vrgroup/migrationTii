@@ -6,7 +6,7 @@ import (
 )
 
 // Insert Request inserta datos en la tabla REQUEST.
-func InsertRequest(db *sql.DB) error {
+func InsertRequest(db *sql.Tx) error {
 	query := `
 	INSERT INTO REQUEST (
 		CONTRACT_ID,

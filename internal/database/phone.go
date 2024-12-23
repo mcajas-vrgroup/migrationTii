@@ -6,7 +6,7 @@ import (
 )
 
 // InsertPhoneData inserta registros únicos en PHONE y asocia con PARTY_PHONE.
-func InsertPhone(db *sql.DB) error {
+func InsertPhone(db *sql.Tx) error {
 	// Insertar en PHONE
 	insertPhoneQuery := `
 	ALTER TABLE PHONE DISABLE KEYS;

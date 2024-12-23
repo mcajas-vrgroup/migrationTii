@@ -6,7 +6,7 @@ import (
 )
 
 // Create Temp Cleaned RUT crea una tabla temporal con RUT limpios.
-func CreateTempCleanedRUT(db *sql.DB) error {
+func CreateTempCleanedRUT(db *sql.Tx) error {
 	query := `
 	CREATE TEMPORARY TABLE temp_cleaned_rut AS
 	SELECT DISTINCT
@@ -31,7 +31,7 @@ func CreateTempCleanedRUT(db *sql.DB) error {
 }
 
 // Insert Identification inserta los valores limpios en IDENTIFICATION.
-func InsertIdentification(db *sql.DB) error {
+func InsertIdentification(db *sql.Tx) error {
 	query := `
 	INSERT INTO IDENTIFICATION (IDENTIFICATION, IDENTIFICATION_TYPE_ID)
 	SELECT CLEAN_RUT, 1
@@ -48,7 +48,7 @@ func InsertIdentification(db *sql.DB) error {
 }
 
 // Associate Party Identification asocia PARTY con IDENTIFICATION.
-func AssociatePartyIdentification(db *sql.DB) error {
+func AssociatePartyIdentification(db *sql.Tx) error {
 	query := `
 	INSERT INTO PARTY_IDENTIFICATION (PARTY_ID, IDENTIFICATION_ID)
 	SELECT p.PARTY_ID, i.IDENTIFICATION_ID

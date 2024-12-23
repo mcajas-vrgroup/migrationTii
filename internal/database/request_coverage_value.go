@@ -6,7 +6,7 @@ import (
 )
 
 // RequestCoverageValue inserta valores en la tabla REQUEST_COVERAGE_VALUE.
-func InsertRequestCoverageValue(db *sql.DB) error {
+func InsertRequestCoverageValue(db *sql.Tx) error {
 	query := `
 	INSERT INTO REQUEST_COVERAGE_VALUE (
 	    REQUEST_ID,

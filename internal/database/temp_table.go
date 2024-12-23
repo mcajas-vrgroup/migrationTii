@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -13,7 +14,7 @@ func fileExists(filePath string) bool {
 }
 
 // Create TempTables crea tablas temporales para asegurados y pólizas.
-func CreateTempTable(db *sql.DB) error {
+func CreateTempTable(db *sql.Tx) error {
 	queries := []string{
 		`CREATE TEMPORARY TABLE temp_csv_data (
 			RAMO INT, NPOLIZA VARCHAR(50), NOMBRES VARCHAR(255),
@@ -44,7 +45,7 @@ func CreateTempTable(db *sql.DB) error {
 }
 
 // Create Cleaned Temp Table crea una tabla temporal con datos únicos.
-func CreateCleanedTempTable(db *sql.DB) error {
+func CreateCleanedTempTable(db *sql.Tx) error {
 	query := `
 	CREATE TEMPORARY TABLE temp_cleaned_data AS
 	SELECT RAMO, NPOLIZA, NOMBRES, APEMATERNO, APEPATERNO, RUT, FECNAC, CLAVESEXO,
@@ -67,12 +68,12 @@ func CreateCleanedTempTable(db *sql.DB) error {
 }
 
 // Load AseguradosData carga los datos procesados a la tabla temp_csv_data.
-func LoadAseguradosData(db *sql.DB, records []map[string]string) error {
+func LoadAseguradosData(db *sql.Tx, records []map[string]string) error {
 	query := `INSERT INTO temp_csv_data (
 		RAMO, NPOLIZA, NOMBRES, APEMATERNO, APEPATERNO, RUT, FECNAC, CLAVESEXO, 
 		ESTCIVIL, TELEFONO, EMAIL, DIRECCION, CODREGION, REGION, CODCOMUNA, 
-		COMUNA, CODCIUDAD, CIUDAD, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_APARTMENT
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+		COMUNA, CODCIUDAD, CIUDAD
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
 	stmt, err := db.Prepare(query)
 	if err != nil {
@@ -80,23 +81,23 @@ func LoadAseguradosData(db *sql.DB, records []map[string]string) error {
 	}
 	defer stmt.Close()
 
-	for _, row := range records {
+	for i, row := range records {
 		_, err := stmt.Exec(
 			row["RAMO"], row["NPOLIZA"], row["NOMBRES"], row["APEMATERNO"], row["APEPATERNO"], row["RUT"],
 			row["FECNAC"], row["CLAVESEXO"], row["ESTCIVIL"], row["TELEFONO"], row["EMAIL"], row["DIRECCION"],
 			row["CODREGION"], row["REGION"], row["CODCOMUNA"], row["COMUNA"], row["CODCIUDAD"], row["CIUDAD"],
-			row["ADDRESS_STREET"], row["ADDRESS_NUMBER"], row["ADDRESS_APARTMENT"],
 		)
 		if err != nil {
+			log.Printf("Error insertando fila #%d: %v. Datos: %+v", i+1, err, row)
 			return fmt.Errorf("error insertando fila: %v", err)
 		}
 	}
-	fmt.Println("Datos de asegurados insertados correctamente en temp_csv_data.")
+	log.Println("Datos de asegurados insertados correctamente en temp_csv_data.")
 	return nil
 }
 
 // Load PolizasData carga los datos procesados a la tabla temp_polizas_data.
-func LoadPolizasData(db *sql.DB, data []map[string]string) error {
+func LoadPolizasData(db *sql.Tx, data []map[string]string) error {
 	query := `INSERT INTO temp_polizas_data (
 		RAMO, NPOLIZA, REQUEST, CODESTADO, ESTADO, NPOLORI, FINIVIG, FTERVIG,
 		IDCONDCOBRO, DESCCONDCOBRO, TPCONDCOBRO, DESCTPCONDCOBRO, IDPERIODPAGO, DESCPERPAGO
@@ -123,7 +124,7 @@ func LoadPolizasData(db *sql.DB, data []map[string]string) error {
 	return nil
 }
 
-func CreateTempOriginalPolicyTable(db *sql.DB) error {
+func CreateTempOriginalPolicyTable(db *sql.Tx) error {
 	query := `
     CREATE TEMPORARY TABLE temp_original_policy AS
     SELECT

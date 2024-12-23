@@ -6,7 +6,7 @@ import (
 )
 
 // RequestParameter inserta valores en la tabla REQUEST_COVERAGE_VALUE.
-func InsertRequestParameter(db *sql.DB) error {
+func InsertRequestParameter(db *sql.Tx) error {
 	query := `
 	INSERT INTO REQUEST_PARAMETER (
     REQUEST_ID,

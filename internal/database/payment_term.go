@@ -6,7 +6,7 @@ import (
 )
 
 // Insert PaymentTerm inserta datos en PAYMENT_TERM asociados a PARTY_ID.
-func InsertPaymentTerm(db *sql.DB) error {
+func InsertPaymentTerm(db *sql.Tx) error {
 	query := `
 	INSERT INTO PAYMENT_TERM (
 		PARTY_ID, PAYMENT_TYPE_ID, CREDIT_CARD_ID, CURRENCY_ID, ACCOUNT_NBR,

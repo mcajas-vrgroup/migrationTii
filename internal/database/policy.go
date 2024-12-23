@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func InsertIntoPolicy(db *sql.DB) error {
+func InsertIntoPolicy(db *sql.Tx) error {
 	query := `
     INSERT INTO POLICY (
     INSURER_PARTY_ID,

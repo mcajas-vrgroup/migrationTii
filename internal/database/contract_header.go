@@ -6,7 +6,7 @@ import (
 )
 
 // Create TempIssuanceDates crea una tabla temporal con las fechas de emisión.
-func CreateTempIssuanceDates(db *sql.DB) error {
+func CreateTempIssuanceDates(db *sql.Tx) error {
 	query := `
 	CREATE TEMPORARY TABLE temp_issuance_dates AS
 	SELECT
@@ -28,7 +28,7 @@ func CreateTempIssuanceDates(db *sql.DB) error {
 }
 
 // Insert ContractHeader inserta datos en CONTRACT_HEADER usando la tabla temporal temp_issuance_dates.
-func InsertContractHeader(db *sql.DB) error {
+func InsertContractHeader(db *sql.Tx) error {
 	query := `
 	INSERT INTO CONTRACT_HEADER (
 		AGENCY_ID,

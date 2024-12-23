@@ -6,7 +6,7 @@ import (
 )
 
 // Inserta datos en PERSON
-func InsertPersonData(db *sql.DB) error {
+func InsertPersonData(db *sql.Tx) error {
 	query := `
 	INSERT INTO PERSON (
 		PARTY_ID, GENDER_ID, MARITAL_STATUS_ID, FIRST_NAME, LAST_NAME, MOTHER_LAST_NAME, BIRTH_DATE

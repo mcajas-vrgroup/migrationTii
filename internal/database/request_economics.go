@@ -6,7 +6,7 @@ import (
 )
 
 // RequestEconomics inserta datos en la tabla REQUEST_ECONOMICS.
-func InsertRequestEconomics(db *sql.DB) error {
+func InsertRequestEconomics(db *sql.Tx) error {
 	query := `
 	INSERT INTO REQUEST_ECONOMICS (
 	    ECONOMIC_ITEM_ID,

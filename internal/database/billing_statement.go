@@ -6,7 +6,7 @@ import (
 )
 
 // Insert BillingStatement inserta datos en la tabla BILLING_STATEMENT.
-func InsertBillingStatement(db *sql.DB) error {
+func InsertBillingStatement(db *sql.Tx) error {
 	query := `
     INSERT INTO BILLING_STATEMENT (
     BILLING_STATEMENT_ID,
