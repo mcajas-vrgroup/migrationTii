@@ -1,0 +1,38 @@
+package database
+
+import (
+	"database/sql"
+	"fmt"
+)
+
+func InsertIntoPolicy(db *sql.DB) error {
+	query := `
+    INSERT INTO POLICY (
+        INSURER_PARTY_ID, POLICY_ID, SECTION_ID, SUB_SECTION_ID, ENDORSEMENT_ID,
+        ENDORSEMENT_TYPE_ID, POLICY_STATUS_ID, CONTRACT_ID, POLICY_ISSUANCE_DATE,
+        ENDORSEMENT_DATE, POLICY_ENTRANCE_DATE, POLICY_PHISICAL_DATE_DELIVERY,
+        POLICY_PHISICAL_DATE_RECEPTION, POLICY_ENDORSEMENT_DATE_FROM,
+        POLICY_ENDORSEMENT_DATE_TO, DATA_SOURCE, POLICY_ELECTRONIC_ACCEPTED,
+        RENEWED_BY, RENEWED_NUMBER, POLICY_AGREEMENT_NUMBER, GRACE_PERIOD,
+        DATE_MODIFIED, POLICY_AFFINITY_GROUP_ID, UNITED_PREMIUM,
+        AGENT_PARTY_ID, SECUENCY
+    )
+    SELECT
+        1020, op.POLICY_ID, 101, 3000, 0, 3000, 1000, c.CONTRACT_ID,
+        op.POLICY_ISSUANCE_DATE, op.POLICY_ISSUANCE_DATE, op.POLICY_ISSUANCE_DATE,
+        NULL, NULL, op.POLICY_ISSUANCE_DATE, op.POLICY_ENDORSEMENT_DATE_TO,
+        NULL, 0, NULL, NULL, NULL, NULL, NOW(), NULL, NULL, 23869, NULL
+    FROM temp_original_policy op
+             JOIN CONTRACT_HEADER c ON c.CONTRACT_ID = (
+        SELECT ch.CONTRACT_ID
+        FROM CONTRACT_HEADER ch
+        WHERE ch.CONTRACT_ID = op.POLICY_ID
+        LIMIT 1
+    );`
+	_, err := db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error insertando en POLICY: %v", err)
+	}
+	fmt.Println("Datos insertados correctamente en POLICY.")
+	return nil
+}

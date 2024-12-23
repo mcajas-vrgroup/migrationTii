@@ -21,7 +21,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// 3. Crear tabla temporal
+	// 3. Crear tablas temporales para datos base
 	if err := database.CreateTempTable(db); err != nil {
 		log.Fatalf("Error creando tabla temporal: %v", err)
 	}
@@ -31,105 +31,96 @@ func main() {
 		log.Fatalf("Error creando tabla limpia temporal: %v", err)
 	}
 
-	// 4. Cargar y limpiar datos de asegurados
+	// 4. Procesar y cargar datos base
 	log.Println("Cargando y procesando datos de asegurados...")
 	aseguradosData, err := data_loader.CleanAndProcessData("data/asegurados.csv")
 	if err != nil {
 		log.Fatalf("Error procesando CSV de asegurados: %v", err)
 	}
-
-	// 5. Insertar en tabla temporal asegurados
 	if err := database.LoadAseguradosData(db, aseguradosData); err != nil {
 		log.Fatalf("Error insertando datos en temp_csv_data: %v", err)
 	}
 
-	// 6. Cargar y limpiar datos de pólizas
 	log.Println("Cargando y procesando datos de pólizas...")
 	polizasData, err := data_loader.CleanDataPolizas("data/polizas.csv")
 	if err != nil {
 		log.Fatalf("Error procesando CSV de pólizas: %v", err)
 	}
-
-	// 7. Insertar en tabla temporal pólizas
 	if err := database.LoadPolizasData(db, polizasData); err != nil {
 		log.Fatalf("Error insertando datos en temp_polizas_data: %v", err)
 	}
 
-	// 8. Insertar en PARTY
+	// 5. Procesar datos de asegurados
+	log.Println("Procesando datos de asegurados...")
 	if err := database.InsertPartyData(db); err != nil {
 		log.Fatalf("Error insertando PARTY: %v", err)
 	}
-
-	// 9. Crear tabla temporal de RUT limpios
 	if err := database.CreateTempCleanedRUT(db); err != nil {
 		log.Fatalf("Error creando tabla temp_cleaned_rut: %v", err)
 	}
-
-	// 10. Insertar en IDENTIFICATION
 	if err := database.InsertIdentification(db); err != nil {
 		log.Fatalf("Error insertando en IDENTIFICATION: %v", err)
 	}
-
-	// 11. Asociar PARTY con IDENTIFICATION
 	if err := database.AssociatePartyIdentification(db); err != nil {
 		log.Fatalf("Error asociando PARTY_IDENTIFICATION: %v", err)
 	}
-
-	// 12. Insertar en EMAIL y asociar a PARTY_EMAIL
 	if err := database.InsertEmail(db); err != nil {
 		log.Fatalf("Error insertando EMAIL y asociando PARTY_EMAIL: %v", err)
 	}
-
-	// 13. Insertar en PHONE y asociar a PARTY_PHONE
 	if err := database.InsertPhone(db); err != nil {
 		log.Fatalf("Error insertando PHONE y asociando PARTY_PHONE: %v", err)
 	}
-
-	// 14. Insertar en ADDRESS y asociar a PARTY_ADDRESS
 	if err := database.InsertAddress(db); err != nil {
-		log.Fatalf("Error insertando ADDRESS: %v", err)
+		log.Fatalf("Error insertando ADDRESS y asociando PARTY_ADDRESS: %v", err)
 	}
-	if err := database.AssociatePartyAddress(db); err != nil {
-		log.Fatalf("Error asociando PARTY_ADDRESS: %v", err)
-	}
-
-	// 15. Insertar en PERSON
 	if err := database.InsertPersonData(db); err != nil {
 		log.Fatalf("Error insertando PERSON: %v", err)
 	}
 
-	// 16. Insertar en PAYMENT_TERM
-	if err := database.InsertPaymentTerm(db); err != nil {
-		log.Fatalf("Error insertando PAYMENT_TERM: %v", err)
-	}
-
-	// 17. Insertar en CONTRACT_HEADER
+	// 6. Procesar datos de pólizas y contratos
+	log.Println("Procesando datos de pólizas y contratos...")
 	if err := database.CreateTempIssuanceDates(db); err != nil {
 		log.Fatalf("Error creando temp_issuance_dates: %v", err)
 	}
-
 	if err := database.InsertContractHeader(db); err != nil {
 		log.Fatalf("Error insertando CONTRACT_HEADER: %v", err)
 	}
 
-	// 18. Insertar en REQUEST
+	// 7. Procesar datos relacionados con REQUEST
+	log.Println("Procesando datos de REQUEST...")
 	if err := database.InsertRequest(db); err != nil {
 		log.Fatalf("Error insertando en REQUEST: %v", err)
 	}
-
-	// 19. Insertar en REQUEST_COVERAGE_VALUE
 	if err := database.InsertRequestCoverageValue(db); err != nil {
 		log.Fatalf("Error inserting REQUEST_COVERAGE_VALUE: %v", err)
 	}
-
-	// 20. Insertar en REQUEST_ECONOMICS
 	if err := database.InsertRequestEconomics(db); err != nil {
 		log.Fatalf("Error insertando en REQUEST_ECONOMICS: %v", err)
 	}
-
-	// 21. Insertar en REQUEST_PARAMETER
 	if err := database.InsertRequestParameter(db); err != nil {
 		log.Fatalf("Error insertando en REQUEST_PARAMETER: %v", err)
+	}
+
+	// 8. Procesar datos de pólizas finales
+	log.Println("Procesando datos de POLICY...")
+	if err := database.CreateTempOriginalPolicyTable(db); err != nil {
+		log.Fatalf("Error creando tabla temporal temp_original_policy: %v", err)
+	}
+	if err := database.InsertIntoPolicy(db); err != nil {
+		log.Fatalf("Error insertando datos en POLICY: %v", err)
+	}
+
+	if err := database.InsertPolicyCoverageValue(db); err != nil {
+		log.Fatalf("Error insertando en POLICY_COVERAGE_VALUE: %v", err)
+	}
+
+	if err := database.InsertPolicyParameter(db); err != nil {
+		log.Fatalf("Error insertando en POLICY_PARAMETER: %v", err)
+	}
+
+	log.Println("Procesando datos de POLICY_ECONOMICS...")
+	if err := database.InsertPolicyEconomics(db); err != nil {
+		log.Fatalf("Error insertando datos en POLICY_ECONOMICS: %v", err)
 	}
 
 	log.Println("Proceso completado correctamente.")

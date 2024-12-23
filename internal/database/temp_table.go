@@ -122,3 +122,21 @@ func LoadPolizasData(db *sql.DB, data []map[string]string) error {
 	fmt.Println("Datos de pólizas insertados correctamente.")
 	return nil
 }
+
+func CreateTempOriginalPolicyTable(db *sql.DB) error {
+	query := `
+    CREATE TEMPORARY TABLE temp_original_policy AS
+    SELECT
+        NPOLORI AS POLICY_ID,
+        MIN(FINIVIG) AS POLICY_ISSUANCE_DATE,
+        MIN(FTERVIG) AS POLICY_ENDORSEMENT_DATE_TO
+    FROM temp_polizas_data
+    WHERE CODESTADO = '03'
+    GROUP BY NPOLORI;`
+	_, err := db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creando temp_original_policy: %v", err)
+	}
+	fmt.Println("Tabla temporal temp_original_policy creada correctamente.")
+	return nil
+}
