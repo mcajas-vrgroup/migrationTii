@@ -117,5 +117,20 @@ func main() {
 		log.Fatalf("Error insertando en REQUEST: %v", err)
 	}
 
+	// 19. Insertar en REQUEST_COVERAGE_VALUE
+	if err := database.InsertRequestCoverageValue(db); err != nil {
+		log.Fatalf("Error inserting REQUEST_COVERAGE_VALUE: %v", err)
+	}
+
+	// 20. Insertar en REQUEST_ECONOMICS
+	if err := database.InsertRequestEconomics(db); err != nil {
+		log.Fatalf("Error insertando en REQUEST_ECONOMICS: %v", err)
+	}
+
+	// 21. Insertar en REQUEST_PARAMETER
+	if err := database.InsertRequestParameter(db); err != nil {
+		log.Fatalf("Error insertando en REQUEST_PARAMETER: %v", err)
+	}
+
 	log.Println("Proceso completado correctamente.")
 }
