@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+func GroupByPartyID(records []map[string]string) map[string][]map[string]string {
+	grouped := make(map[string][]map[string]string)
+	for _, record := range records {
+		partyID := record["RUT"] // Usar "RUT" o el campo que identifica al PARTY_ID
+		grouped[partyID] = append(grouped[partyID], record)
+	}
+	return grouped
+}
+
 // Limpia el RUT
 func CleanRUT(rut string) string {
 	rut = strings.ToUpper(strings.TrimSpace(rut))

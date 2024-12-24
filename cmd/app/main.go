@@ -112,39 +112,49 @@ func main() {
 	log.Println("Procesando datos de asegurados...")
 	blockStart = time.Now()
 	if err := database.InsertPartyData(tx); err != nil {
-		return
+		log.Fatalf("Error insertando PARTY: %v", err)
 	}
 	if err := database.CreateTempCleanedRUT(tx); err != nil {
 		return
 	}
 	if err := database.InsertIdentification(tx); err != nil {
-		return
+		log.Fatalf("Error insertando IDENTIFICATION: %v", err)
 	}
 	if err := database.AssociatePartyIdentification(tx); err != nil {
-		return
+		log.Fatalf("Error insertando PARTY_IDENTIFICATION: %v", err)
 	}
+	log.Println("Iniciando inserción en EMAIL...")
 	if err := database.InsertEmail(tx); err != nil {
-		return
+		log.Fatalf("Error insertando EMAIL: %v", err)
 	}
+	log.Println("EMAIL insertado correctamente.")
 	if err := database.InsertPhone(tx); err != nil {
-		return
+		log.Fatalf("Error insertando PHONE: %v", err)
 	}
 	if err := database.InsertAddress(tx); err != nil {
-		return
+		log.Fatalf("Error insertando ADDRESS: %v", err)
+	}
+	if err := database.AssociatePartyAddress(tx); err != nil {
+		log.Fatalf("Error insertando PARTY_ADDRESS: %v", err)
 	}
 	if err := database.InsertPersonData(tx); err != nil {
-		return
+		log.Fatalf("Error insertando PERSON: %v", err)
 	}
+
+	if err := database.InsertPaymentTerm(tx); err != nil {
+		log.Fatalf("Error insertando PAYMENT_TERM: %v", err)
+	}
+
 	r.Add(fmt.Sprintf("Datos de asegurados procesados en %v.", time.Since(blockStart)))
 
 	// 7. Procesar datos de pólizas y contratos
 	log.Println("Procesando datos de pólizas y contratos...")
 	blockStart = time.Now()
 	if err := database.CreateTempIssuanceDates(tx); err != nil {
-		return
+		log.Fatalf("Error creando tabla temporal: %v", err)
 	}
 	if err := database.InsertContractHeader(tx); err != nil {
-		return
+		log.Fatalf("Error insertando en CONTRACT_HEADER: %v", err)
 	}
 	r.Add(fmt.Sprintf("Datos de pólizas y contratos procesados en %v.", time.Since(blockStart)))
 
@@ -152,16 +162,16 @@ func main() {
 	log.Println("Procesando datos de REQUEST...")
 	blockStart = time.Now()
 	if err := database.InsertRequest(tx); err != nil {
-		return
+		log.Fatalf("Error insertando REQUEST: %v", err)
 	}
 	if err := database.InsertRequestCoverageValue(tx); err != nil {
-		return
+		log.Fatalf("Error insertando REQUEST_COVERAGE_VALUE: %v", err)
 	}
 	if err := database.InsertRequestEconomics(tx); err != nil {
-		return
+		log.Fatalf("Error insertando REQUEST_ECONOMICS: %v", err)
 	}
 	if err := database.InsertRequestParameter(tx); err != nil {
-		return
+		log.Fatalf("Error insertando REQUEST_PARAMETER: %v", err)
 	}
 	r.Add(fmt.Sprintf("Datos de REQUEST procesados en %v.", time.Since(blockStart)))
 
@@ -169,19 +179,19 @@ func main() {
 	log.Println("Procesando datos de POLICY...")
 	blockStart = time.Now()
 	if err := database.CreateTempOriginalPolicyTable(tx); err != nil {
-		return
+		log.Fatalf("Error creando tabla temporal: %v", err)
 	}
 	if err := database.InsertIntoPolicy(tx); err != nil {
-		return
+		log.Fatalf("Error insertando en POLICY: %v", err)
 	}
 	if err := database.InsertPolicyCoverageValue(tx); err != nil {
-		return
+		log.Fatalf("Error insertando en POLICY_COVERAGE_VALUE: %v", err)
 	}
 	if err := database.InsertPolicyParameter(tx); err != nil {
-		return
+		log.Fatalf("Error insertando en POLICY_PARAMETER: %v", err)
 	}
 	if err := database.InsertPolicyEconomics(tx); err != nil {
-		return
+		log.Fatalf("Error insertando en POLICY_ECONOMICS: %v", err)
 	}
 	r.Add(fmt.Sprintf("Datos de POLICY procesados en %v.", time.Since(blockStart)))
 
@@ -189,7 +199,7 @@ func main() {
 	log.Println("Procesando datos de BILLING_STATEMENT...")
 	blockStart = time.Now()
 	if err := database.InsertBillingStatement(tx); err != nil {
-		return
+		log.Fatalf("Error insertando en BILLING_STATEMENT: %v", err)
 	}
 	r.Add(fmt.Sprintf("Datos de BILLING_STATEMENT procesados en %v.", time.Since(blockStart)))
 
