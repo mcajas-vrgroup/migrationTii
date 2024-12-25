@@ -29,7 +29,7 @@ func CreateTempTable(db *sql.Tx) error {
 			RAMO INT, NPOLIZA VARCHAR(50), REQUEST VARCHAR(50), CODESTADO VARCHAR(10),
 			ESTADO VARCHAR(50), NPOLORI VARCHAR(50), FINIVIG DATE, FTERVIG DATE,
 			IDCONDCOBRO VARCHAR(50), DESCCONDCOBRO VARCHAR(100), TPCONDCOBRO VARCHAR(10),
-			DESCTPCONDCOBRO VARCHAR(50), IDPERIODPAGO VARCHAR(10), DESCPERPAGO VARCHAR(50)
+			DESCTPCONDCOBRO VARCHAR(50),NROCONDCOBRO INT, IDPERIODPAGO VARCHAR(10), DESCPERPAGO VARCHAR(50)
 		);`,
 	}
 
@@ -100,8 +100,8 @@ func LoadAseguradosData(db *sql.Tx, records []map[string]string) error {
 func LoadPolizasData(db *sql.Tx, data []map[string]string) error {
 	query := `INSERT INTO temp_polizas_data (
 		RAMO, NPOLIZA, REQUEST, CODESTADO, ESTADO, NPOLORI, FINIVIG, FTERVIG,
-		IDCONDCOBRO, DESCCONDCOBRO, TPCONDCOBRO, DESCTPCONDCOBRO, IDPERIODPAGO, DESCPERPAGO
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+		IDCONDCOBRO, DESCCONDCOBRO, TPCONDCOBRO, DESCTPCONDCOBRO, NROCONDCOBRO, IDPERIODPAGO, DESCPERPAGO
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
 	stmt, err := db.Prepare(query)
 	if err != nil {
@@ -114,7 +114,7 @@ func LoadPolizasData(db *sql.Tx, data []map[string]string) error {
 			row["RAMO"], row["NPOLIZA"], row["REQUEST"], row["CODESTADO"],
 			row["ESTADO"], row["NPOLORI"], row["FINIVIG"], row["FTERVIG"],
 			row["IDCONDCOBRO"], row["DESCCONDCOBRO"], row["TPCONDCOBRO"],
-			row["DESCTPCONDCOBRO"], row["IDPERIODPAGO"], row["DESCPERPAGO"],
+			row["DESCTPCONDCOBRO"], row["NROCONDCOBRO"], row["IDPERIODPAGO"], row["DESCPERPAGO"],
 		)
 		if err != nil {
 			return fmt.Errorf("error insertando pólizas: %v", err)
@@ -128,12 +128,13 @@ func CreateTempOriginalPolicyTable(db *sql.Tx) error {
 	query := `
     CREATE TEMPORARY TABLE temp_original_policy AS
     SELECT
-        NPOLORI AS POLICY_ID,
+        RAMO,
+        NPOLORI,
         MIN(FINIVIG) AS POLICY_ISSUANCE_DATE,
         MIN(FTERVIG) AS POLICY_ENDORSEMENT_DATE_TO
     FROM temp_polizas_data
     WHERE CODESTADO = '03'
-    GROUP BY NPOLORI;`
+    GROUP BY RAMO, NPOLORI;`
 	_, err := db.Exec(query)
 	if err != nil {
 		return fmt.Errorf("error creando temp_original_policy: %v", err)

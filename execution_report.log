@@ -1,0 +1,16 @@
+[2024-12-24 15:46:54] Configuración cargada correctamente.
+[2024-12-24 15:46:54] Conexión a la base de datos establecida.
+[2024-12-24 15:46:54] Transacción iniciada.
+[2024-12-24 15:46:55] Tabla temporal creada en 266.7828ms.
+[2024-12-24 15:46:55] Tabla temporal limpia creada en 133.6307ms.
+[2024-12-24 15:47:06] Datos de asegurados cargados en 11.013229s.
+[2024-12-24 15:47:17] Datos de pólizas cargados en 10.927243s.
+[2024-12-24 15:47:23] Datos de asegurados procesados en 6.6361454s.
+[2024-12-24 15:47:24] Datos de pólizas y contratos procesados en 310.5995ms.
+[2024-12-24 15:47:24] Datos de REQUEST procesados en 543.483ms.
+[2024-12-24 15:47:25] Datos de POLICY procesados en 668.051ms.
+[2024-12-24 15:47:25] Datos de BILLING_STATEMENT procesados en 155.2347ms.
+[2024-12-24 15:47:25] Proceso completado exitosamente.
+[2024-12-24 15:47:25] Transacción completada exitosamente en 30.9150353s.
+Tiempo total de ejecución: 31.7270804s
+Estado final: ÉXITO
