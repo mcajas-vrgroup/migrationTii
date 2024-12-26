@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"migrationTii/internal/data_loader"
 )
 
 // RequestEconomics inserta datos en la tabla REQUEST_ECONOMICS.
@@ -69,6 +69,6 @@ WHERE r.REQUEST_ID = (SELECT MAX(REQUEST_ID) FROM REQUEST) -- Usar el REQUEST_ID
 	}
 
 	fmt.Println("Datos insertados en REQUEST_ECONOMICS correctamente.")
-	log.Println(query)
+	data_loader.AddToSqlScript(query)
 	return nil
 }

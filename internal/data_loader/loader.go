@@ -3,6 +3,7 @@ package data_loader
 import (
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -158,4 +159,17 @@ func CleanDataPolizas(csvPath string) ([]map[string]string, error) {
 		data = append(data, entry)
 	}
 	return data, nil
+}
+
+func AddToSqlScript(sqlQuery string) string {
+	queryFile, err := os.OpenFile("query-tii-vulcano.sql", os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatalf("Error al abrir archivo query: %v", err)
+	}
+	defer queryFile.Close()
+	content := []byte(sqlQuery)
+	if _, err := queryFile.Write(content); err != nil {
+		log.Fatalf("Error escribir query: %v", err)
+	}
+	return ""
 }

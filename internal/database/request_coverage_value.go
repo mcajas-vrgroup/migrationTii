@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"migrationTii/internal/data_loader"
 )
 
 // RequestCoverageValue inserta valores en la tabla REQUEST_COVERAGE_VALUE.
@@ -56,6 +56,6 @@ WHERE t.CODESTADO = '03'; -- Solo pólizas vigentes
 	}
 
 	fmt.Println("Datos insertados en REQUEST_COVERAGE_VALUE correctamente.")
-	log.Println(query)
+	data_loader.AddToSqlScript(query)
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"migrationTii/internal/data_loader"
 	"os"
 	"strings"
 )
@@ -87,7 +88,7 @@ func LoadAseguradosData(db *sql.Tx, records []map[string]string) error {
 	for i, row := range records {
 
 		queryData := strings.Replace(query, "?", "'%v'", -1)
-		log.Println(fmt.Sprintf(queryData, row["RAMO"], row["NPOLIZA"], row["NOMBRES"], row["APEMATERNO"], row["APEPATERNO"], row["RUT"],
+		data_loader.AddToSqlScript(fmt.Sprintf(queryData, row["RAMO"], row["NPOLIZA"], row["NOMBRES"], row["APEMATERNO"], row["APEPATERNO"], row["RUT"],
 			row["FECNAC"], row["CLAVESEXO"], row["ESTCIVIL"], row["TELEFONO"], row["EMAIL"], row["DIRECCION"],
 			row["CODREGION"], row["REGION"], row["CODCOMUNA"], row["COMUNA"], row["CODCIUDAD"], row["CIUDAD"]))
 
@@ -121,19 +122,24 @@ func LoadPolizasData(db *sql.Tx, data []map[string]string) error {
 	//defer stmt.Close()
 
 	for _, row := range data {
+		queryData := strings.Replace(query, "?", "'%v'", -1)
+		data_loader.AddToSqlScript(fmt.Sprintf(queryData, row["RAMO"], row["NPOLIZA"], row["REQUEST"], row["CODESTADO"],
+			row["ESTADO"], row["NPOLORI"], row["FINIVIG"], row["FTERVIG"],
+			row["IDCONDCOBRO"], row["DESCCONDCOBRO"], row["TPCONDCOBRO"],
+			row["DESCTPCONDCOBRO"], row["NROCONDCOBRO"], row["IDPERIODPAGO"], row["DESCPERPAGO"]))
+
 		_, err := stmt.Exec(
 			row["RAMO"], row["NPOLIZA"], row["REQUEST"], row["CODESTADO"],
 			row["ESTADO"], row["NPOLORI"], row["FINIVIG"], row["FTERVIG"],
 			row["IDCONDCOBRO"], row["DESCCONDCOBRO"], row["TPCONDCOBRO"],
 			row["DESCTPCONDCOBRO"], row["NROCONDCOBRO"], row["IDPERIODPAGO"], row["DESCPERPAGO"],
 		)
-		log.Println(row)
 		if err != nil {
 			return fmt.Errorf("error insertando pólizas: %v", err)
 		}
 	}
 	fmt.Println("Datos de pólizas insertados correctamente.")
-	log.Println(query)
+	data_loader.AddToSqlScript(query)
 	return nil
 }
 

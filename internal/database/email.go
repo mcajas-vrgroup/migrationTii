@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"migrationTii/internal/data_loader"
 )
 
 // InsertEmailData inserta registros únicos en EMAIL.
@@ -81,13 +82,13 @@ func InsertEmail(db *sql.Tx) error {
 	}
 
 	log.Println("Emails insertados correctamente.")
-	log.Println(insertEmailQuery)
+	data_loader.AddToSqlScript(insertEmailQuery)
 	// Ejecutar la query para asociar emails con PARTY
 	if _, err := db.Exec(insertPartyEmailQuery); err != nil {
 		return fmt.Errorf("error asociando PARTY_EMAIL: %v", err)
 	}
 
 	log.Println("PARTY_EMAIL asociado correctamente.")
-	log.Println(insertEmailQuery)
+	data_loader.AddToSqlScript(insertEmailQuery)
 	return nil
 }

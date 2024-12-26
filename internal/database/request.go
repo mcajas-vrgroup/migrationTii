@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"migrationTii/internal/data_loader"
 )
 
 // Insert Request inserta datos en la tabla REQUEST.
@@ -55,6 +55,6 @@ func InsertRequest(db *sql.Tx) error {
 	}
 
 	fmt.Println("Datos insertados correctamente en REQUEST.")
-	log.Println(query)
+	data_loader.AddToSqlScript(query)
 	return nil
 }

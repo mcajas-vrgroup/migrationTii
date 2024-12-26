@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"migrationTii/internal/data_loader"
 )
 
 // RequestParameter inserta valores en la tabla REQUEST_COVERAGE_VALUE.
@@ -66,6 +66,6 @@ WHERE r.REQUEST_ID = (
 	}
 
 	fmt.Println("Datos insertados en REQUEST_PARAMETER correctamente.")
-	log.Println(query)
+	data_loader.AddToSqlScript(query)
 	return nil
 }

@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"migrationTii/internal/data_loader"
 )
 
 // Insert Address inserta datos únicos en la tabla ADDRESS.
@@ -34,7 +34,7 @@ func InsertAddress(db *sql.Tx) error {
 		return fmt.Errorf("error insertando en ADDRESS: %v", err)
 	}
 	fmt.Println("Datos insertados en ADDRESS correctamente.")
-	log.Println(insertAddressQuery)
+	data_loader.AddToSqlScript(insertAddressQuery)
 	return nil
 }
 
@@ -55,6 +55,6 @@ func AssociatePartyAddress(db *sql.Tx) error {
 		return fmt.Errorf("error asociando PARTY_ADDRESS: %v", err)
 	}
 	fmt.Println("PARTY_ADDRESS asociado correctamente.")
-	log.Println(associateQuery)
+	data_loader.AddToSqlScript(associateQuery)
 	return nil
 }

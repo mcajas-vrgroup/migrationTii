@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"migrationTii/internal/data_loader"
 )
 
 // Insert PolicyCoverageValue inserta datos en la tabla POLICY_COVERAGE_VALUE
@@ -63,6 +63,6 @@ WHERE t.NPOLIZA LIKE '%00' AND t.CODESTADO = '03';`
 	}
 
 	fmt.Println("Datos insertados correctamente en POLICY_COVERAGE_VALUE.")
-	log.Println(query)
+	data_loader.AddToSqlScript(query)
 	return nil
 }
