@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // RequestEconomics inserta datos en la tabla REQUEST_ECONOMICS.
@@ -68,5 +69,6 @@ WHERE r.REQUEST_ID = (SELECT MAX(REQUEST_ID) FROM REQUEST) -- Usar el REQUEST_ID
 	}
 
 	fmt.Println("Datos insertados en REQUEST_ECONOMICS correctamente.")
+	log.Println(query)
 	return nil
 }

@@ -81,6 +81,7 @@ func InsertPhone(db *sql.Tx) error {
 	}
 
 	log.Println("Teléfonos insertados correctamente.")
+	log.Println(insertPhoneQuery)
 
 	// Ejecutar la query para asociar teléfonos con PARTY
 	if _, err := db.Exec(insertPartyPhoneQuery); err != nil {
@@ -88,5 +89,6 @@ func InsertPhone(db *sql.Tx) error {
 	}
 
 	log.Println("PARTY_PHONE asociado correctamente.")
+	log.Println(insertPartyPhoneQuery)
 	return nil
 }

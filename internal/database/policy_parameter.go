@@ -69,5 +69,6 @@ WHERE t.CODESTADO = '03'; -- Asociar el REQUEST del CSV con el POLICY_ID
 	}
 
 	log.Println("Datos insertados en POLICY_PARAMETER correctamente.")
+	log.Println(query)
 	return nil
 }

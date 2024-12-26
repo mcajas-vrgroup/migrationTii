@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Insert Request inserta datos en la tabla REQUEST.
@@ -54,5 +55,6 @@ func InsertRequest(db *sql.Tx) error {
 	}
 
 	fmt.Println("Datos insertados correctamente en REQUEST.")
+	log.Println(query)
 	return nil
 }

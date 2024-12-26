@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Insert BillingStatement inserta datos en la tabla BILLING_STATEMENT.
@@ -67,5 +68,6 @@ WHERE t.CODESTADO = '03';
 	}
 
 	fmt.Println("Datos insertados correctamente en BILLING_STATEMENT.")
+	log.Println(query)
 	return nil
 }

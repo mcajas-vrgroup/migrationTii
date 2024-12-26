@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // RequestParameter inserta valores en la tabla REQUEST_COVERAGE_VALUE.
@@ -65,5 +66,6 @@ WHERE r.REQUEST_ID = (
 	}
 
 	fmt.Println("Datos insertados en REQUEST_PARAMETER correctamente.")
+	log.Println(query)
 	return nil
 }

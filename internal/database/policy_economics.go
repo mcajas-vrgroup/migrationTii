@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Insert PolicyEconomics inserta datos en la tabla POLICY_ECONOMICS.
@@ -71,5 +72,6 @@ WHERE t.CODESTADO = '03';
 	}
 
 	fmt.Println("Datos insertados correctamente en POLICY_ECONOMICS.")
+	log.Println(query)
 	return nil
 }

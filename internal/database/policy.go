@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 func InsertIntoPolicy(db *sql.Tx) error {
@@ -72,5 +73,6 @@ GROUP BY t.RAMO, t.NPOLORI;
 		return fmt.Errorf("error insertando en POLICY: %v", err)
 	}
 	fmt.Println("Datos insertados correctamente en POLICY.")
+	log.Println(query)
 	return nil
 }

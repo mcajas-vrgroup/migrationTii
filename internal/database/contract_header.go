@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Create TempIssuanceDates crea una tabla temporal con las fechas de emisión.
@@ -24,6 +25,7 @@ func CreateTempIssuanceDates(db *sql.Tx) error {
 	}
 
 	fmt.Println("Tabla temporal temp_issuance_dates creada correctamente.")
+	log.Println(query)
 	return nil
 }
 
@@ -78,5 +80,6 @@ func InsertContractHeader(db *sql.Tx) error {
 	}
 
 	fmt.Println("Datos insertados correctamente en CONTRACT_HEADER.")
+	log.Println(query)
 	return nil
 }

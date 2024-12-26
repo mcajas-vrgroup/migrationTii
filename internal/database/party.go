@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Inser tParty Data inserta registros únicos en la tabla PARTY si no existen.
@@ -37,6 +38,7 @@ func InsertPartyData(db *sql.Tx) error {
 		return fmt.Errorf("error insertando datos en PARTY: %v", err)
 	}
 	fmt.Println("Datos insertados en PARTY correctamente.")
+	log.Println(insertPartyQuery)
 
 	// Query para contar cuántos registros se insertaron
 	countQuery := `SELECT COUNT(*) AS total_insertados FROM PARTY;`
@@ -47,6 +49,5 @@ func InsertPartyData(db *sql.Tx) error {
 		return fmt.Errorf("error al contar registros en PARTY: %v", err)
 	}
 	fmt.Printf("Total de registros insertados en PARTY: %d\n", totalInsertados)
-
 	return nil
 }

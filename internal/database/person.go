@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Inserta datos en PERSON
@@ -46,5 +47,6 @@ func InsertPersonData(db *sql.Tx) error {
 		return fmt.Errorf("error insertando en PERSON: %v", err)
 	}
 	fmt.Println("Datos insertados o actualizados en PERSON correctamente.")
+	log.Println(query)
 	return nil
 }

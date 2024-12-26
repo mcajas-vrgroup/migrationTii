@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Insert PaymentTerm inserta datos en PAYMENT_TERM asociados a PARTY_ID.
@@ -87,5 +88,6 @@ JOIN PARTY p ON p.PARTY_ID = c.HOLDER_PARTY_ID;
 	}
 
 	fmt.Println("Datos insertados correctamente en PAYMENT_TERM.")
+	log.Println()
 	return nil
 }

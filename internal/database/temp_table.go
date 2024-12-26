@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 // file Exists verifica si un archivo existe en la ruta proporcionada.
@@ -41,6 +42,7 @@ func CreateTempTable(db *sql.Tx) error {
 		}
 	}
 	fmt.Println("Tablas temporales creadas exitosamente.")
+	log.Println(queries)
 	return nil
 }
 
@@ -64,6 +66,7 @@ func CreateCleanedTempTable(db *sql.Tx) error {
 		return fmt.Errorf("error creando temp_cleaned_data: %v", err)
 	}
 	fmt.Println("Tabla temp_cleaned_data creada correctamente.")
+	log.Println(query)
 	return nil
 }
 
@@ -79,20 +82,28 @@ func LoadAseguradosData(db *sql.Tx, records []map[string]string) error {
 	if err != nil {
 		return fmt.Errorf("error preparando la consulta: %v", err)
 	}
-	defer stmt.Close()
+	//defer stmt.Close()
 
 	for i, row := range records {
+
+		queryData := strings.Replace(query, "?", "'%v'", -1)
+		log.Println(fmt.Sprintf(queryData, row["RAMO"], row["NPOLIZA"], row["NOMBRES"], row["APEMATERNO"], row["APEPATERNO"], row["RUT"],
+			row["FECNAC"], row["CLAVESEXO"], row["ESTCIVIL"], row["TELEFONO"], row["EMAIL"], row["DIRECCION"],
+			row["CODREGION"], row["REGION"], row["CODCOMUNA"], row["COMUNA"], row["CODCIUDAD"], row["CIUDAD"]))
+
 		_, err := stmt.Exec(
 			row["RAMO"], row["NPOLIZA"], row["NOMBRES"], row["APEMATERNO"], row["APEPATERNO"], row["RUT"],
 			row["FECNAC"], row["CLAVESEXO"], row["ESTCIVIL"], row["TELEFONO"], row["EMAIL"], row["DIRECCION"],
 			row["CODREGION"], row["REGION"], row["CODCOMUNA"], row["COMUNA"], row["CODCIUDAD"], row["CIUDAD"],
 		)
+
 		if err != nil {
 			log.Printf("Error insertando fila #%d: %v. Datos: %+v", i+1, err, row)
 			return fmt.Errorf("error insertando fila: %v", err)
 		}
 	}
 	log.Println("Datos de asegurados insertados correctamente en temp_csv_data.")
+	log.Println(query)
 	return nil
 }
 
@@ -107,7 +118,7 @@ func LoadPolizasData(db *sql.Tx, data []map[string]string) error {
 	if err != nil {
 		return fmt.Errorf("error preparando la consulta: %v", err)
 	}
-	defer stmt.Close()
+	//defer stmt.Close()
 
 	for _, row := range data {
 		_, err := stmt.Exec(
@@ -116,11 +127,13 @@ func LoadPolizasData(db *sql.Tx, data []map[string]string) error {
 			row["IDCONDCOBRO"], row["DESCCONDCOBRO"], row["TPCONDCOBRO"],
 			row["DESCTPCONDCOBRO"], row["NROCONDCOBRO"], row["IDPERIODPAGO"], row["DESCPERPAGO"],
 		)
+		log.Println(row)
 		if err != nil {
 			return fmt.Errorf("error insertando pólizas: %v", err)
 		}
 	}
 	fmt.Println("Datos de pólizas insertados correctamente.")
+	log.Println(query)
 	return nil
 }
 
