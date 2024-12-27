@@ -33,8 +33,7 @@ func InsertIntoPolicy(db *sql.Tx) error {
     DATE_MODIFIED,
     POLICY_AFFINITY_GROUP_ID,
     UNITED_PREMIUM,
-    AGENT_PARTY_ID,
-    SECUENCY
+    AGENT_PARTY_ID
 )
 SELECT
     1020 AS INSURER_PARTY_ID,                 -- Aseguradora fija
@@ -61,8 +60,7 @@ SELECT
     NOW() AS DATE_MODIFIED,                   -- Fecha de modificación actual
     NULL AS POLICY_AFFINITY_GROUP_ID,         -- Sin grupo de afinidad
     NULL AS UNITED_PREMIUM,                   -- Prima unificada nula
-    23869 AS AGENT_PARTY_ID,                  -- ID del agente fijo
-    NULL AS SECUENCY                          -- Sin secuencia
+    23869 AS AGENT_PARTY_ID                   -- ID del agente fijo
 FROM temp_polizas_data t
          JOIN CONTRACT_HEADER c ON c.CONTRACT_ID = t.NPOLIZA
 WHERE t.CODESTADO = '03' -- Solo pólizas originales y vigentes
