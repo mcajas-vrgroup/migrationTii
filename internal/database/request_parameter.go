@@ -66,6 +66,7 @@ WHERE r.REQUEST_ID = (
 	}
 
 	fmt.Println("Datos insertados en REQUEST_PARAMETER correctamente.")
+	data_loader.AddToSqlScript("\n-- RequestParameter inserta valores en la tabla REQUEST_COVERAGE_VALUE.\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }

@@ -72,6 +72,7 @@ WHERE t.CODESTADO = '03';
 	}
 
 	fmt.Println("Datos insertados correctamente en POLICY_ECONOMICS.")
+	data_loader.AddToSqlScript("\n-- Insert PolicyEconomics inserta datos en la tabla POLICY_ECONOMICS.\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }

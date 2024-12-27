@@ -82,6 +82,7 @@ func InsertPhone(db *sql.Tx) error {
 	}
 
 	log.Println("Teléfonos insertados correctamente.")
+	data_loader.AddToSqlScript("\n-- InsertPhoneData inserta registros únicos en PHONE.\n\n")
 	data_loader.AddToSqlScript(insertPhoneQuery)
 
 	// Ejecutar la query para asociar teléfonos con PARTY
@@ -90,6 +91,7 @@ func InsertPhone(db *sql.Tx) error {
 	}
 
 	log.Println("PARTY_PHONE asociado correctamente.")
+	data_loader.AddToSqlScript("\n-- Asocia con PARTY_PHONE.\n\n")
 	data_loader.AddToSqlScript(insertPartyPhoneQuery)
 	return nil
 }

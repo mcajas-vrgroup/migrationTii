@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"migrationTii/internal/data_loader"
 )
 
 func InsertPartyData(db *sql.DB, records [][]string) error {
@@ -23,5 +24,7 @@ func InsertPartyData(db *sql.DB, records [][]string) error {
 	}
 
 	fmt.Println("Datos insertados en PARTY correctamente.")
+	data_loader.AddToSqlScript("-- insertar PARTY")
+	data_loader.AddToSqlScript(query)
 	return nil
 }

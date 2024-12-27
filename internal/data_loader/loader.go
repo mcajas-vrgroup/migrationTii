@@ -162,7 +162,7 @@ func CleanDataPolizas(csvPath string) ([]map[string]string, error) {
 }
 
 func AddToSqlScript(sqlQuery string) string {
-	queryFile, err := os.OpenFile("query-tii-vulcano.sql", os.O_APPEND, 0644)
+	queryFile, err := os.OpenFile("query-tii-vulcano.sql", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatalf("Error al abrir archivo query: %v", err)
 	}

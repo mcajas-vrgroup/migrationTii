@@ -88,6 +88,7 @@ JOIN PARTY p ON p.PARTY_ID = c.HOLDER_PARTY_ID;
 	}
 
 	fmt.Println("Datos insertados correctamente en PAYMENT_TERM.")
+	data_loader.AddToSqlScript("\n-- insert PaymentTerm inserta datos en PAYMENT_TERM asociados a PARTY_ID.\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }

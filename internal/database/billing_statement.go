@@ -68,6 +68,7 @@ WHERE t.CODESTADO = '03';
 	}
 
 	fmt.Println("Datos insertados correctamente en BILLING_STATEMENT.")
+	data_loader.AddToSqlScript("\n-- Insert BillingStatement inserta datos en la tabla BILLING_STATEMENT.\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }

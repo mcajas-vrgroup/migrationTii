@@ -34,6 +34,7 @@ func InsertAddress(db *sql.Tx) error {
 		return fmt.Errorf("error insertando en ADDRESS: %v", err)
 	}
 	fmt.Println("Datos insertados en ADDRESS correctamente.")
+	data_loader.AddToSqlScript("\n-- Insert Address inserta datos únicos en la tabla ADDRESS.\n\n")
 	data_loader.AddToSqlScript(insertAddressQuery)
 	return nil
 }
@@ -55,6 +56,7 @@ func AssociatePartyAddress(db *sql.Tx) error {
 		return fmt.Errorf("error asociando PARTY_ADDRESS: %v", err)
 	}
 	fmt.Println("PARTY_ADDRESS asociado correctamente.")
+	data_loader.AddToSqlScript("\n--  Associate Party Address asocia las direcciones con PARTY en la tabla PARTY_ADDRESS.\n\n")
 	data_loader.AddToSqlScript(associateQuery)
 	return nil
 }

@@ -63,6 +63,7 @@ WHERE t.NPOLIZA LIKE '%00' AND t.CODESTADO = '03';`
 	}
 
 	fmt.Println("Datos insertados correctamente en POLICY_COVERAGE_VALUE.")
+	data_loader.AddToSqlScript("\n-- Insert PolicyCoverageValue inserta datos en la tabla POLICY_COVERAGE_VALUE\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }

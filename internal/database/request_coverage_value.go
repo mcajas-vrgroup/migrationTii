@@ -56,6 +56,7 @@ WHERE t.CODESTADO = '03'; -- Solo pólizas vigentes
 	}
 
 	fmt.Println("Datos insertados en REQUEST_COVERAGE_VALUE correctamente.")
+	data_loader.AddToSqlScript("\n-- RequestCoverageValue inserta valores en la tabla REQUEST_COVERAGE_VALUE.\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }

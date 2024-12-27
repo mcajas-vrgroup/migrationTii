@@ -73,6 +73,7 @@ GROUP BY t.RAMO, t.NPOLORI;
 		return fmt.Errorf("error insertando en POLICY: %v", err)
 	}
 	fmt.Println("Datos insertados correctamente en POLICY.")
+	data_loader.AddToSqlScript("\n-- Inserta datos en POLICY.\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }

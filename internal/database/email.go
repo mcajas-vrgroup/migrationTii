@@ -82,13 +82,15 @@ func InsertEmail(db *sql.Tx) error {
 	}
 
 	log.Println("Emails insertados correctamente.")
+	data_loader.AddToSqlScript("\n-- Insertar directamente en EMAIL\n\n")
 	data_loader.AddToSqlScript(insertEmailQuery)
 	// Ejecutar la query para asociar emails con PARTY
-	if _, err := db.Exec(insertPartyEmailQuery); err != nil {
+	if _, err := db.Exec(insertEmailQuery); err != nil {
 		return fmt.Errorf("error asociando PARTY_EMAIL: %v", err)
 	}
 
 	log.Println("PARTY_EMAIL asociado correctamente.")
-	data_loader.AddToSqlScript(insertEmailQuery)
+	data_loader.AddToSqlScript("\n-- Asociar el nuevo EMAIL_ID al PARTY_ID en PARTY_EMAIL\n\n")
+	data_loader.AddToSqlScript(insertPartyEmailQuery)
 	return nil
 }

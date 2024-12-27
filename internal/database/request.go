@@ -55,6 +55,7 @@ func InsertRequest(db *sql.Tx) error {
 	}
 
 	fmt.Println("Datos insertados correctamente en REQUEST.")
+	data_loader.AddToSqlScript("\n-- Insert Request inserta datos en la tabla REQUEST.\n\n")
 	data_loader.AddToSqlScript(query)
 	return nil
 }
